@@ -13,4 +13,14 @@ This repository currently contains the scaffold and base UI only:
 - Three-zone product shell
 - Idea input form
 
-AI analysis, Zod validation, localStorage, and the real map engine are intentionally reserved for later phases.
+## Phase 2
+
+The project now includes the local data foundation:
+
+- Zod schemas for initial analysis and map generation
+- `aiNodeSchema` declared before `mapGenerationSchema`
+- A one-retry validation helper for AI responses
+- `localStorage` persistence for draft projects
+- Draft creation from the base UI
+
+AI calls and the real map engine are intentionally reserved for later phases.

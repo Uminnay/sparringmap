@@ -7,9 +7,10 @@ const navigationItems = ["Nuevo mapa", "Borradores", "Archivo"] as const;
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
+  projectCount: number;
 }
 
-export function Sidebar({ isOpen, onToggle }: SidebarProps) {
+export function Sidebar({ isOpen, onToggle, projectCount }: SidebarProps) {
   if (!isOpen) {
     return (
       <aside className="hidden border-r bg-panel/95 shadow-sm lg:flex lg:min-h-screen lg:flex-col lg:items-center lg:px-2 lg:py-4">
@@ -25,6 +26,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         <div className="mt-4 grid size-9 place-items-center rounded-lg bg-primary text-xs font-bold text-primary-foreground shadow-sm">
           SM
         </div>
+        {projectCount > 0 ? (
+          <div className="mt-4 rounded-full bg-secondary px-2 py-1 text-xs text-muted-foreground">
+            {projectCount}
+          </div>
+        ) : null}
       </aside>
     );
   }
@@ -63,7 +69,12 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             data-active={item === "Nuevo mapa"}
             type="button"
           >
-            {item}
+            <span>{item}</span>
+            {item === "Borradores" && projectCount > 0 ? (
+              <span className="float-right rounded-full bg-primary/15 px-2 text-xs text-primary">
+                {projectCount}
+              </span>
+            ) : null}
           </button>
         ))}
       </nav>

@@ -1,3 +1,5 @@
+import type { AIStructuredResponse } from "@/lib/schemas/ai";
+
 export type ProjectType = "app_product" | "business_strategy";
 
 export type NodeType =
@@ -25,23 +27,7 @@ export interface AINode {
   priority: AIPriority;
 }
 
-export interface AIStructuredResponse {
-  project_title: string;
-  summary: string;
-  central_idea: string;
-  sections: {
-    objectives: AINode[];
-    risks: AINode[];
-    actions: AINode[];
-    hypotheses: AINode[];
-  };
-  diagnostic: {
-    summary: string;
-    weak_points: string[];
-    critical_risks: string[];
-    next_steps: string[];
-  };
-}
+export type { AIStructuredResponse };
 
 export interface SparringProject {
   id: string;

@@ -7,6 +7,7 @@ import { TopBar } from "@/components/app-shell/TopBar";
 import { CanvasPlaceholder } from "@/components/canvas/CanvasPlaceholder";
 import { IdeaForm, type IdeaFormValues } from "@/components/idea/IdeaForm";
 import { InspectorPanel } from "@/components/inspector/InspectorPanel";
+import { useLocalProjects } from "@/hooks/useLocalProjects";
 import { cn } from "@/lib/utils";
 
 type ThemeMode = "dark" | "light";
@@ -19,6 +20,8 @@ export function AppShell() {
   const [theme, setTheme] = useState<ThemeMode>("dark");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
+  const { createDraft, projects, storageError } = useLocalProjects();
+  const latestProject = projects[0];
 
   const appGrid = cn(
     "grid min-h-screen grid-cols-1 transition-[grid-template-columns] duration-300",
@@ -45,6 +48,7 @@ export function AppShell() {
         <Sidebar
           isOpen={isSidebarOpen}
           onToggle={() => setIsSidebarOpen((value) => !value)}
+          projectCount={projects.length}
         />
         <section className="flex min-w-0 flex-col border-y bg-canvas lg:min-h-screen lg:border-x lg:border-y-0">
           <TopBar
@@ -55,7 +59,11 @@ export function AppShell() {
             theme={theme}
           />
           <div className="grid min-h-0 flex-1 grid-rows-[auto_minmax(460px,1fr)] gap-4 p-3 md:gap-5 md:p-5">
-            <IdeaForm initialValues={draft} onChange={setDraft} />
+            <IdeaForm
+              initialValues={draft}
+              onChange={setDraft}
+              onSubmitDraft={createDraft}
+            />
             <CanvasPlaceholder
               hasDraft={draft.rawInput.trim().length > 0}
               projectType={draft.type}
@@ -65,7 +73,9 @@ export function AppShell() {
         <InspectorPanel
           draft={draft}
           isOpen={isInspectorOpen}
+          latestProject={latestProject}
           onToggle={() => setIsInspectorOpen((value) => !value)}
+          storageError={storageError}
         />
       </div>
     </main>

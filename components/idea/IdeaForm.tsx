@@ -31,9 +31,14 @@ export interface IdeaFormValues {
 interface IdeaFormProps {
   initialValues: IdeaFormValues;
   onChange: (values: IdeaFormValues) => void;
+  onSubmitDraft: (values: IdeaFormValues) => void;
 }
 
-export function IdeaForm({ initialValues, onChange }: IdeaFormProps) {
+export function IdeaForm({
+  initialValues,
+  onChange,
+  onSubmitDraft,
+}: IdeaFormProps) {
   const textareaId = useId();
   const typeId = useId();
   const [submitted, setSubmitted] = useState(false);
@@ -51,7 +56,14 @@ export function IdeaForm({ initialValues, onChange }: IdeaFormProps) {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!hasInput) {
+      return;
+    }
     setSubmitted(true);
+    onSubmitDraft({
+      rawInput: trimmedInput,
+      type: initialValues.type,
+    });
   }
 
   return (
@@ -112,7 +124,7 @@ export function IdeaForm({ initialValues, onChange }: IdeaFormProps) {
         <CardFooter className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-muted-foreground">
             {submitted
-              ? "Borrador listo para la fase de análisis."
+              ? "Borrador guardado en este navegador."
               : "La generación del mapa se activará en fases posteriores."}
           </p>
           <Button disabled={!hasInput} type="submit">

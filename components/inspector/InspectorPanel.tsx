@@ -3,11 +3,14 @@ import { PanelRightClose, PanelRightOpen } from "lucide-react";
 import type { IdeaFormValues } from "@/components/idea/IdeaForm";
 import { Button } from "@/components/ui/button";
 import { PROJECT_TYPE_OPTIONS } from "@/lib/constants";
+import type { SparringProject } from "@/types";
 
 interface InspectorPanelProps {
   draft: IdeaFormValues;
   isOpen: boolean;
+  latestProject?: SparringProject;
   onToggle: () => void;
+  storageError?: string;
 }
 
 const futureBlocks = [
@@ -17,7 +20,13 @@ const futureBlocks = [
   "Próximos pasos",
 ] as const;
 
-export function InspectorPanel({ draft, isOpen, onToggle }: InspectorPanelProps) {
+export function InspectorPanel({
+  draft,
+  isOpen,
+  latestProject,
+  onToggle,
+  storageError,
+}: InspectorPanelProps) {
   const selectedType = PROJECT_TYPE_OPTIONS.find(
     (option) => option.value === draft.type
   );
@@ -68,9 +77,29 @@ export function InspectorPanel({ draft, isOpen, onToggle }: InspectorPanelProps)
         <InspectorCard label="Tipo seleccionado" value={selectedType?.label} />
         <InspectorCard
           label="Estado"
-          value={hasDraft ? "Borrador con input" : "Esperando idea inicial"}
+          value={
+            latestProject
+              ? "Borrador guardado"
+              : hasDraft
+                ? "Borrador con input"
+                : "Esperando idea inicial"
+          }
         />
+        {latestProject ? (
+          <InspectorCard label="Último borrador" value={latestProject.title} />
+        ) : null}
       </div>
+
+      {storageError ? (
+        <div className="mt-5 rounded-xl border border-destructive/40 bg-destructive/10 p-4">
+          <p className="text-xs font-medium uppercase text-destructive">
+            Error local
+          </p>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">
+            {storageError}
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-5 rounded-xl border bg-background/45 p-4">
         <p className="text-xs font-medium uppercase text-muted-foreground">
