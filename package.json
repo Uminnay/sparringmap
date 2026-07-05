@@ -7,12 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@radix-ui/react-label": "latest",
     "@radix-ui/react-select": "latest",
     "@radix-ui/react-slot": "latest",
+    "@xyflow/react": "^12.11.1",
     "class-variance-authority": "latest",
     "clsx": "latest",
     "lucide-react": "latest",

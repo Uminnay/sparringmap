@@ -11,6 +11,15 @@ export const initialAnalysisSchema = z.object({
   questions: z.array(z.string().min(1)).max(3),
 });
 
+export const verdictSchema = z.object({
+  status: z.enum(["advance", "validate", "reframe", "discard"]),
+  headline: z.string().min(1),
+  rationale: z.string().min(1),
+  evidence: z.array(z.string().min(1)).min(1).max(5),
+  uncertainty: z.array(z.string().min(1)).min(1).max(5),
+  next_decision: z.string().min(1),
+});
+
 export const mapGenerationSchema = z.object({
   project_title: z.string().min(1),
   summary: z.string().min(1),
@@ -27,6 +36,11 @@ export const mapGenerationSchema = z.object({
     critical_risks: z.array(z.string().min(1)),
     next_steps: z.array(z.string().min(1)),
   }),
+  verdict: verdictSchema.optional(),
+});
+
+export const aiMapGenerationSchema = mapGenerationSchema.extend({
+  verdict: verdictSchema,
 });
 
 export type AIInitialAnalysis = z.infer<typeof initialAnalysisSchema>;
@@ -64,7 +78,7 @@ export function validateAIResponse<T>(
     ok: false,
     error: {
       message:
-        "La respuesta de IA no cumple el contrato esperado. No se generará un mapa no validado.",
+        "La IA ha devuelto un resultado incompleto. Volveremos a intentarlo una vez.",
       rawResponse,
       issues: result.error.issues.map((issue) => issue.message),
     },
@@ -101,7 +115,7 @@ export async function validateAIResponseWithRetry<T>(
     ok: false,
     error: {
       message:
-        "La validación Zod ha fallado dos veces. No se generará un mapa no validado.",
+        "La IA no ha devuelto un resultado utilizable tras dos intentos. Tu contenido anterior se mantiene intacto.",
       rawResponse: secondAttempt.rawResponse ?? firstAttempt.rawResponse,
       issues: secondResult.error.issues,
     },

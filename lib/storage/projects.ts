@@ -1,11 +1,13 @@
 "use client";
 
 import { localProjectsSchema } from "@/lib/schemas/project";
-import type { ProjectType, SparringProject } from "@/types";
+import { normalizeProjectVersions } from "@/lib/versions";
+import type { AIModelId, ProjectType, SparringProject } from "@/types";
 
 const STORAGE_KEY = "sparringmap.projects.v1";
 
 export interface CreateDraftProjectInput {
+  aiModelId: AIModelId;
   rawInput: string;
   type: ProjectType;
 }
@@ -38,7 +40,11 @@ export function loadProjects(): ProjectStorageSnapshot {
       };
     }
 
-    return { projects: result.data };
+    return {
+      projects: result.data.map((project) =>
+        normalizeProjectVersions(project)
+      ),
+    };
   } catch {
     return {
       projects: [],
@@ -56,6 +62,7 @@ export function saveProjects(projects: SparringProject[]) {
 }
 
 export function createDraftProject({
+  aiModelId,
   rawInput,
   type,
 }: CreateDraftProjectInput): SparringProject {
@@ -66,11 +73,59 @@ export function createDraftProject({
     id: createProjectId(now),
     title,
     type,
+    aiModelId,
     status: "draft",
     rawInput,
     createdAt: now,
     updatedAt: now,
   };
+}
+
+export function createProjectCopy(
+  project: SparringProject,
+  existingIds: string[],
+  titleSuffix = "copia"
+) {
+  const now = new Date().toISOString();
+
+  return {
+    ...project,
+    id: createAvailableProjectId(now, existingIds),
+    title: `${project.title} (${titleSuffix})`,
+    status: project.structuredResponse ? ("mapped" as const) : ("draft" as const),
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export function prepareImportedProject(
+  project: SparringProject,
+  existingIds: string[]
+) {
+  const now = new Date().toISOString();
+  const id = existingIds.includes(project.id)
+    ? createAvailableProjectId(now, existingIds)
+    : project.id;
+
+  return {
+    ...project,
+    id,
+    status: project.status === "archived" ? ("draft" as const) : project.status,
+    title: existingIds.includes(project.id)
+      ? `${project.title} (importado)`
+      : project.title,
+    updatedAt: now,
+  };
+}
+
+export function replaceProject(project: SparringProject) {
+  const { projects } = loadProjects();
+  const nextProjects = projects.map((item) =>
+    item.id === project.id ? project : item
+  );
+
+  saveProjects(nextProjects);
+  return nextProjects;
 }
 
 export function upsertProject(project: SparringProject) {
@@ -89,6 +144,19 @@ export function upsertProject(project: SparringProject) {
 
 function createProjectId(createdAt: string) {
   return `project-${createdAt.replace(/[^0-9]/g, "")}`;
+}
+
+function createAvailableProjectId(createdAt: string, existingIds: string[]) {
+  const baseId = createProjectId(createdAt);
+  let candidate = baseId;
+  let suffix = 2;
+
+  while (existingIds.includes(candidate)) {
+    candidate = `${baseId}-${suffix}`;
+    suffix += 1;
+  }
+
+  return candidate;
 }
 
 function inferProjectTitle(rawInput: string) {
