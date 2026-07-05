@@ -7,6 +7,11 @@ SparringMap is a visual strategic sparring app. It helps turn early ideas into a
 The prioritized product and technical improvement plan is maintained in
 [`ROADMAP_MEJORAS.md`](./ROADMAP_MEJORAS.md).
 
+Project-specific working instructions for AI agents are in
+[`AGENTS.md`](./AGENTS.md). Product strategy, private-use assumptions, and
+future beta/monetization decisions are captured in
+[`docs/PRODUCT_STRATEGY.md`](./docs/PRODUCT_STRATEGY.md).
+
 ## Phase 1
 
 This repository currently contains the scaffold and base UI only:

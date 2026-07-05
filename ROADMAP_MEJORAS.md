@@ -419,3 +419,15 @@ La siguiente fase recomendada es:
 
 No se recomienda empezar despliegue ni persistencia remota hasta reducir deuda
 tecnica, dividir componentes grandes y ampliar tests.
+
+## 9. Estrategia futura
+
+La estrategia de uso privado, posible beta cerrada, control de costes de IA y
+monetizacion futura esta documentada en:
+
+[`docs/PRODUCT_STRATEGY.md`](./docs/PRODUCT_STRATEGY.md)
+
+Decision actual: mantener el proyecto como herramienta privada hasta validar uso
+real con casos propios. No implementar login, pagos, trial, Supabase ni
+despliegue publico sin decidir antes si el camino sera herramienta privada, beta
+cerrada o producto vendible a pequena escala.
