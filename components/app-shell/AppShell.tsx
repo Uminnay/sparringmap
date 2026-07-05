@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { flushSync } from "react-dom";
 
 import { Sidebar, type AppView } from "@/components/app-shell/Sidebar";
 import { TopBar } from "@/components/app-shell/TopBar";
@@ -13,6 +14,7 @@ import {
 } from "@/components/inspector/InspectorPanel";
 import { ProjectLibrary } from "@/components/projects/ProjectLibrary";
 import { PrintableReport } from "@/components/report/PrintableReport";
+import { PrintableVisualMap } from "@/components/report/PrintableVisualMap";
 import { MapChangeConfirmation } from "@/components/sparring/MapChangeConfirmation";
 import { RefinementRound } from "@/components/sparring/RefinementRound";
 import { SparringActions } from "@/components/sparring/SparringActions";
@@ -44,6 +46,7 @@ import type {
 } from "@/types";
 
 type ThemeMode = "dark" | "light";
+type PrintMode = "map" | "report";
 
 type PendingMapChange =
   | {
@@ -89,6 +92,7 @@ export function AppShell() {
   const [refinementNote, setRefinementNote] = useState("");
   const [projectName, setProjectName] = useState("");
   const [savedNotice, setSavedNotice] = useState<string>();
+  const [printMode, setPrintMode] = useState<PrintMode>("report");
   const [questionAnswers, setQuestionAnswers] = useState<string[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
@@ -412,6 +416,30 @@ export function AppShell() {
     window.setTimeout(() => setSavedNotice(undefined), 1800);
   }
 
+  function handlePrintReport() {
+    flushSync(() => setPrintMode("report"));
+    window.addEventListener(
+      "afterprint",
+      () => {
+        setPrintMode("report");
+      },
+      { once: true }
+    );
+    window.setTimeout(() => window.print(), 0);
+  }
+
+  function handlePrintMap() {
+    flushSync(() => setPrintMode("map"));
+    window.addEventListener(
+      "afterprint",
+      () => {
+        setPrintMode("report");
+      },
+      { once: true }
+    );
+    window.setTimeout(() => window.print(), 0);
+  }
+
   function handleRefinementAnswerChange(index: number, value: string) {
     setRefinementAnswers((currentAnswers) => {
       const nextAnswers = [...currentAnswers];
@@ -626,7 +654,8 @@ export function AppShell() {
     <main
       className={cn(
         "min-h-screen bg-background text-foreground antialiased",
-        theme === "dark" && "dark"
+        theme === "dark" && "dark",
+        printMode === "map" ? "print-map-mode" : "print-report-mode"
       )}
     >
       <div className={cn(appGrid, "screen-app-shell")}>
@@ -639,7 +668,7 @@ export function AppShell() {
           onToggle={() => setIsSidebarOpen((value) => !value)}
           projectCount={projects.length}
         />
-        <section className="flex min-w-0 flex-col border-y bg-canvas lg:min-h-screen lg:border-x lg:border-y-0">
+        <section className="print-map-workspace flex min-w-0 flex-col border-y bg-canvas lg:min-h-screen lg:border-x lg:border-y-0">
           <TopBar
             activeStage={workflowStage}
             availableStage={availableStage}
@@ -721,7 +750,7 @@ export function AppShell() {
                 ) : null}
 
                 {workflowStage === "map" ? (
-                  <div className="grid min-h-0 gap-4 md:gap-5">
+                  <div className="print-map-content grid min-h-0 gap-4 md:gap-5">
                     <StageContextPanels
                       answers={questionAnswers}
                       compact
@@ -734,6 +763,8 @@ export function AppShell() {
                       compact
                       latestProject={latestProject}
                       onProjectNameChange={setProjectName}
+                      onPrintMap={handlePrintMap}
+                      onPrintReport={handlePrintReport}
                       onSaveProject={handleSaveProject}
                       projectName={projectName}
                       savedNotice={savedNotice}
@@ -807,6 +838,7 @@ export function AppShell() {
         title={confirmation.title}
       />
       <PrintableReport project={latestProject} />
+      <PrintableVisualMap project={latestProject} />
     </main>
   );
 }

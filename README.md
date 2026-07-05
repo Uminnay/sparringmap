@@ -159,6 +159,9 @@ Exports are now suitable for sharing outside the app:
 - Printing uses a dedicated report view instead of the working interface
 - Navigation, forms, canvas controls, sidebars, and debugging details are excluded from print
 - The report includes cover, verdict, strategic map, diagnosis, actions, hypotheses, and next steps
+- The visual map can be exported as a clean print/PDF view with only the map
+- The visual map print view uses SVG cards, full wrapped text, review status labels, and softer background arrows
+- Editable `.doc`, Markdown notes, printable report, visual map PDF, and JSON backup are available from the map export menu
 - Markdown export is structured for documentation and Notion-style notes
 - Node review statuses are included in Markdown and the printed report
 - JSON export remains the complete local backup format

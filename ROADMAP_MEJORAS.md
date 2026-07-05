@@ -2,7 +2,7 @@
 
 Documento vivo para ordenar, priorizar e implementar las mejoras de SparringMap.
 
-Ultima actualizacion: 23 de junio de 2026.
+Ultima actualizacion: 5 de julio de 2026.
 
 ## 1. Vision del producto
 
@@ -35,21 +35,18 @@ interfaz de chat convencional.
 - Nodos movibles, zoom, pan, controles y minimapa opcional.
 - IDs, edges y posiciones generados por el frontend.
 - Diagnostico, veredicto, exportacion y refinamiento.
+- Exportaciones de documento editable, Markdown, informe imprimible, mapa visual
+  imprimible/PDF y backup JSON.
 - Guardado local, biblioteca de borradores y archivo.
 
 ### Limitaciones actuales
 
-- El flujo completo ocupa demasiado espacio vertical.
-- Las posiciones manuales, zoom y viewport del mapa no se guardan.
-- Refinar sustituye el mapa anterior y no crea una version recuperable.
-- No existe deshacer ni historial de cambios.
-- El veredicto se basa en reglas simples, no en un contrato de IA especifico.
-- No se ha evaluado sistematicamente la calidad de los modelos.
-- La exportacion PDF depende de imprimir la interfaz actual.
-- No hay tests automatizados.
 - Algunos componentes han crecido demasiado.
 - El guardado local no se sincroniza entre dispositivos y puede perderse si
   se borran los datos del navegador.
+- No hay persistencia remota, login, control de cuotas ni despliegue publico.
+- Aun faltan tests de navegador para asegurar visualmente las exportaciones en
+  distintos tamanos y configuraciones de impresion.
 
 ## 3. Principios de implementacion
 
@@ -291,18 +288,29 @@ Objetivo: convertir el resultado en un entregable util fuera de la app.
 - [x] Mantener exportacion JSON para copia de seguridad.
 - [x] Evaluar exportacion visual PNG.
 - [x] Pedir confirmacion antes de instalar una libreria para PNG o PDF.
+- [x] Anadir exportacion de documento editable para Word/Google Docs.
+- [x] Anadir resumen ejecutivo copiable.
+- [x] Anadir exportacion de mapa visual imprimible/PDF.
+- [x] Separar el mapa visual imprimible de la interfaz de trabajo.
+- [x] Evitar solapes en el mapa visual imprimible usando tarjetas SVG.
+- [x] Mostrar texto completo y estado de nodo en la exportacion visual.
 
 ### Criterios de aceptacion
 
 - El PDF impreso se entiende sin abrir SparringMap.
 - Markdown y JSON contienen toda la informacion relevante.
 - La exportacion no incluye secretos, claves ni datos internos de depuracion.
+- El mapa visual exportado no muestra barras, paneles ni controles de la app.
+- Las tarjetas del mapa visual no se solapan y muestran el estado del nodo.
 
 ### Nota de implementacion
 
 La exportacion PDF usa la impresion nativa del navegador sobre una vista
-profesional oculta en pantalla. No se instala libreria de PDF ni PNG. La
-exportacion PNG queda aparcada porque requiere capturar el canvas o instalar
+profesional oculta en pantalla. El informe y el mapa visual usan modos de
+impresion separados. El mapa visual no imprime el canvas interactivo: genera un
+SVG especifico para imprimir, con tarjetas nativas, texto completo envuelto,
+estado de nodo y flechas suaves de fondo. No se instala libreria de PDF ni PNG.
+La exportacion PNG queda aparcada porque requiere capturar el canvas o instalar
 una dependencia especifica, y eso debe aprobarse por separado.
 
 ## Fase 12 - Arquitectura, tests y observabilidad

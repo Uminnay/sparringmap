@@ -8,6 +8,7 @@ import {
   Download,
   FileJson,
   FileText,
+  Map,
   Printer,
   Save,
 } from "lucide-react";
@@ -26,6 +27,8 @@ interface MapWorkspaceBarProps {
   compact?: boolean;
   latestProject?: SparringProject;
   onProjectNameChange: (value: string) => void;
+  onPrintMap: () => void;
+  onPrintReport: () => void;
   onSaveProject: () => void;
   projectName: string;
   savedNotice?: string;
@@ -36,6 +39,8 @@ export function MapWorkspaceBar({
   compact = false,
   latestProject,
   onProjectNameChange,
+  onPrintMap,
+  onPrintReport,
   onSaveProject,
   projectName,
   savedNotice,
@@ -183,7 +188,14 @@ export function MapWorkspaceBar({
             disabled={!canExport}
             icon={<Printer aria-hidden="true" />}
             label="Informe"
-            onClick={() => window.print()}
+            onClick={onPrintReport}
+          />
+          <ExportOption
+            description="Canvas visual ajustado a una pagina."
+            disabled={!canExport}
+            icon={<Map aria-hidden="true" />}
+            label="Mapa visual"
+            onClick={onPrintMap}
           />
           <ExportOption
             description="Copia completa para reimportar el mapa."

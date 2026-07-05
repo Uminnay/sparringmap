@@ -340,7 +340,7 @@ export function CanvasPlaceholder({
   }
 
   return (
-    <section className="relative min-h-[680px] overflow-hidden rounded-xl border bg-canvas shadow-sm md:min-h-[820px]">
+    <section className="print-map-surface relative min-h-[680px] overflow-hidden rounded-xl border bg-canvas shadow-sm md:min-h-[820px]">
       <ReactFlow
         className="strategic-flow"
         colorMode="dark"

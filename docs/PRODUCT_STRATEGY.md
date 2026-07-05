@@ -8,6 +8,10 @@ una conversacion concreta con un agente.
 SparringMap esta pensada, por ahora, como herramienta privada de Noelia/Lia para
 probar si el flujo aporta claridad estrategica real en el dia a dia.
 
+Estado actualizado a 5 de julio de 2026: la app ya permite trabajar con mapas
+estrategicos guardados localmente, versiones, estados por nodo y exportaciones
+para sacar el resultado fuera de la interfaz.
+
 La app usa claves de IA configuradas localmente en servidor mediante:
 
 - `GEMINI_API_KEY`
@@ -44,6 +48,15 @@ Implicaciones:
 
 Este camino es el mas simple y puede ser suficiente si el valor principal es uso
 personal.
+
+Estado actual de exportaciones para uso privado:
+
+- documento editable para Word o Google Docs;
+- Markdown para Notion o documentacion;
+- informe imprimible/PDF;
+- mapa visual imprimible/PDF con tarjetas SVG legibles, estado de nodo y sin
+  controles de interfaz;
+- backup JSON como formato recuperable para mover o restaurar proyectos.
 
 ## Camino posible 2: beta cerrada
 
@@ -109,7 +122,7 @@ esa decision conscientemente.
 
 - Probar el flujo completo con casos reales.
 - Registrar fricciones de uso diario.
-- Mejorar exportaciones, panel derecho y onboarding.
+- Seguir puliendo exportaciones, panel derecho y onboarding segun uso real.
 - Mantener el sistema local y simple.
 
 ### Fase B - Estabilizacion tecnica
@@ -118,6 +131,7 @@ esa decision conscientemente.
 - Dividir `InspectorPanel`.
 - Separar estado de proyecto, mapa, IA, refinamiento y exportacion.
 - Ampliar tests de schemas, layout, almacenamiento y exportaciones.
+- Anadir pruebas de navegador para exportaciones visuales e impresion.
 - Revisar accesibilidad y rendimiento.
 
 ### Fase C - Preparacion beta
