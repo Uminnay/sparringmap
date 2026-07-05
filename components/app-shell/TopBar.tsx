@@ -2,6 +2,7 @@ import { Moon, Sun } from "lucide-react";
 
 import { WorkflowStepper } from "@/components/app-shell/WorkflowStepper";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { ProjectType, WorkflowStage } from "@/types";
 
 const projectTypeLabel: Record<ProjectType, string> = {
@@ -33,13 +34,29 @@ export function TopBar({
   theme,
 }: TopBarProps) {
   const displayTitle =
-    libraryTitle ?? (projectTitle || "Nuevo mapa estratégico");
+    libraryTitle ?? (projectTitle || "Nuevo mapa estrategico");
+  const isMapStage = showWorkflow && activeStage === "map";
+  const projectStateLabel = projectTitle
+    ? isMapStage
+      ? "Mapa guardado local"
+      : "Guardado local"
+    : "Borrador";
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-[var(--panel-glass)] px-3 py-3 backdrop-blur-xl md:px-5">
-      <div className="flex min-h-10 items-center justify-between gap-3">
+    <header
+      className={cn(
+        "sticky top-0 z-20 border-b bg-[var(--panel-glass)] px-3 backdrop-blur-xl md:px-5",
+        isMapStage ? "py-2" : "py-3"
+      )}
+    >
+      <div className="flex min-h-9 items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="truncate text-base font-semibold md:text-lg">
+          <h1
+            className={cn(
+              "truncate font-semibold",
+              isMapStage ? "text-sm md:text-base" : "text-base md:text-lg"
+            )}
+          >
             {displayTitle}
           </h1>
           <p className="truncate text-xs text-muted-foreground">
@@ -66,17 +83,18 @@ export function TopBar({
           </Button>
           {showWorkflow ? (
             <div className="hidden rounded-md border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-sm sm:block">
-              {projectTitle ? "Guardado local" : "Borrador"}
+              {projectStateLabel}
             </div>
           ) : null}
         </div>
       </div>
 
       {showWorkflow ? (
-        <div className="mt-3">
+        <div className={cn(isMapStage ? "mt-2" : "mt-3")}>
           <WorkflowStepper
             activeStage={activeStage}
             availableStage={availableStage}
+            compact={isMapStage}
             onStageChange={onStageChange}
           />
         </div>

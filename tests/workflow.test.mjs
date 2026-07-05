@@ -8,6 +8,10 @@ import {
 } from "../lib/project-transfer.ts";
 import { calculateStrategicQualityScore } from "../lib/evaluation/rubric.ts";
 import { strategicEvaluationCases } from "../lib/evaluation/test-cases.ts";
+import {
+  createExecutiveSummaryText,
+  createProjectDocumentHTML,
+} from "../lib/document-export.ts";
 import { formatProjectMarkdown } from "../lib/markdown.ts";
 import { aiMapGenerationSchema } from "../lib/schemas/ai.ts";
 import {
@@ -69,10 +73,11 @@ test("reorganizar un mapa produce siempre las mismas posiciones", () => {
     buildDeterministicNodePositions(response),
     buildDeterministicNodePositions(response)
   );
-  assert.deepEqual(
-    buildDeterministicNodePositions(response).central,
-    { x: -160, y: -104 }
-  );
+  const positions = buildDeterministicNodePositions(response);
+
+  assert.deepEqual(positions.central, { x: -150, y: -96 });
+  assert.equal(positions["risk-0"].x, -760);
+  assert.equal(positions["action-0"].x, 520);
 });
 
 test("exportar e importar conserva el proyecto completo", () => {
@@ -246,7 +251,7 @@ test("el Markdown profesional incluye veredicto, mapa y estados sin depuración 
     structuredResponse: {
       ...project.structuredResponse,
       verdict: {
-        evidence: ["Hay un problema descrito."],
+        evidence: ["Respuesta a Q1: Hay un problema descrito."],
         headline: "Validar antes de construir",
         next_decision: "Probar demanda con cinco usuarios.",
         rationale: "La idea necesita evidencia antes de pasar a desarrollo.",
@@ -261,6 +266,72 @@ test("el Markdown profesional incluye veredicto, mapa y estados sin depuración 
   assert.equal(markdown.includes("**Estado del nodo:** Bloqueado"), true);
   assert.equal(markdown.includes("**Validar** (Alta, Validado)"), true);
   assert.equal(markdown.includes("rawResponse"), false);
+});
+
+test("el documento editable convierte el mapa en secciones y bullets", () => {
+  const project = {
+    ...createMappedProject(),
+    mapLayout: {
+      nodePositions: {},
+      nodeStatuses: {
+        "action-0": "validated",
+        "risk-0": "blocked",
+      },
+    },
+    structuredResponse: {
+      ...createMappedProject().structuredResponse,
+      project_title: "Proyecto <piloto>",
+      verdict: {
+        evidence: ["Respuesta a Q1: Hay un problema descrito."],
+        headline: "Validar antes de construir",
+        next_decision: "Probar demanda con cinco usuarios.",
+        rationale: "La idea necesita evidencia antes de pasar a desarrollo.",
+        status: "validate",
+        uncertainty: ["No hay datos de adopción."],
+      },
+    },
+  };
+  const documentHTML = createProjectDocumentHTML(project);
+
+  assert.equal(documentHTML.includes("<h2>Mapa en formato de trabajo</h2>"), true);
+  assert.equal(documentHTML.includes("<h2>Preguntas y respuestas usadas</h2>"), true);
+  assert.equal(documentHTML.includes("<h2>Plan de accion inmediato</h2>"), true);
+  assert.equal(documentHTML.includes("Pregunta 1:"), true);
+  assert.equal(documentHTML.includes("Pregunta inicial"), true);
+  assert.equal(documentHTML.includes("Respuesta inicial"), true);
+  assert.equal(
+    documentHTML.includes("Respuesta a Q1: (Pregunta inicial)"),
+    true
+  );
+  assert.equal(documentHTML.includes("<h3>Acciones</h3>"), true);
+  assert.equal(documentHTML.includes("[ ] Validar (Alta, Validado)"), true);
+  assert.equal(documentHTML.includes("Estado: Bloqueado"), true);
+  assert.equal(documentHTML.includes("Proyecto &lt;piloto&gt;"), true);
+  assert.equal(documentHTML.includes("rawResponse"), false);
+});
+
+test("el resumen ejecutivo copiable contiene solo lo accionable", () => {
+  const project = {
+    ...createMappedProject(),
+    structuredResponse: {
+      ...createMappedProject().structuredResponse,
+      verdict: {
+        evidence: ["Hay un problema descrito."],
+        headline: "Validar antes de construir",
+        next_decision: "Probar demanda con cinco usuarios.",
+        rationale: "La idea necesita evidencia antes de pasar a desarrollo.",
+        status: "validate",
+        uncertainty: ["No hay datos de adopcion."],
+      },
+    },
+  };
+  const summary = createExecutiveSummaryText(project);
+
+  assert.equal(summary.includes("RESUMEN EJECUTIVO"), true);
+  assert.equal(summary.includes("VEREDICTO"), true);
+  assert.equal(summary.includes("RIESGOS PRINCIPALES"), true);
+  assert.equal(summary.includes("ACCIONES PRIORITARIAS"), true);
+  assert.equal(summary.includes("rawResponse"), false);
 });
 
 function createMappedProject() {

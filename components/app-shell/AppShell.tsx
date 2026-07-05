@@ -633,6 +633,7 @@ export function AppShell() {
         <Sidebar
           activeView={activeView}
           archivedCount={archivedCount}
+          hasActiveProject={Boolean(latestProject)}
           isOpen={isSidebarOpen}
           onNavigate={handleNavigate}
           onToggle={() => setIsSidebarOpen((value) => !value)}
@@ -658,7 +659,14 @@ export function AppShell() {
             showWorkflow={activeView === "new"}
             theme={theme}
           />
-          <div className="min-h-0 flex-1 p-3 md:p-5">
+          <div
+            className={cn(
+              "min-h-0 flex-1 p-3",
+              activeView === "new" && workflowStage === "map"
+                ? "md:p-4"
+                : "md:p-5"
+            )}
+          >
             {activeView === "new" ? (
               <>
                 <WorkflowStatusBanner
@@ -716,12 +724,14 @@ export function AppShell() {
                   <div className="grid min-h-0 gap-4 md:gap-5">
                     <StageContextPanels
                       answers={questionAnswers}
+                      compact
                       draft={draft}
                       includeQuestions
                       onEditStage={handleEditStage}
                       project={latestProject}
                     />
                     <MapWorkspaceBar
+                      compact
                       latestProject={latestProject}
                       onProjectNameChange={setProjectName}
                       onSaveProject={handleSaveProject}

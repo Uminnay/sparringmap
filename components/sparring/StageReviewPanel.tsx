@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 interface StageReviewPanelProps {
   actionLabel: string;
   children: ReactNode;
+  compact?: boolean;
   defaultOpen?: boolean;
   onEdit: () => void;
   summary: string;
@@ -17,6 +18,7 @@ interface StageReviewPanelProps {
 export function StageReviewPanel({
   actionLabel,
   children,
+  compact = false,
   defaultOpen = false,
   onEdit,
   summary,
@@ -26,7 +28,7 @@ export function StageReviewPanel({
 
   return (
     <section className="rounded-lg border bg-card/80 shadow-sm">
-      <div className="flex min-w-0 items-center gap-2 p-3">
+      <div className={compact ? "flex min-w-0 items-center gap-2 p-2" : "flex min-w-0 items-center gap-2 p-3"}>
         <button
           aria-expanded={isOpen}
           className="flex min-w-0 flex-1 items-center gap-3 text-left"
@@ -45,12 +47,24 @@ export function StageReviewPanel({
             </span>
           </span>
         </button>
-        <Button onClick={onEdit} size="sm" type="button" variant="outline">
+        <Button
+          onClick={onEdit}
+          size={compact ? "icon" : "sm"}
+          title={actionLabel}
+          type="button"
+          variant="outline"
+        >
           <Pencil aria-hidden="true" data-icon="inline-start" />
-          <span className="hidden sm:inline">{actionLabel}</span>
+          {compact ? null : (
+            <span className="hidden sm:inline">{actionLabel}</span>
+          )}
         </Button>
       </div>
-      {isOpen ? <div className="border-t p-4">{children}</div> : null}
+      {isOpen ? (
+        <div className={compact ? "border-t p-3" : "border-t p-4"}>
+          {children}
+        </div>
+      ) : null}
     </section>
   );
 }

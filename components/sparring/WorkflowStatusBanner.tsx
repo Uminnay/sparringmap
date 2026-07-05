@@ -29,6 +29,7 @@ export function WorkflowStatusBanner({
   workflowStage,
 }: WorkflowStatusBannerProps) {
   const content = getStatusContent({
+    currentVersionLabel,
     hasIdea,
     hasMap,
     questionCount,
@@ -37,25 +38,26 @@ export function WorkflowStatusBanner({
     workflowStage,
   });
   const Icon = content.icon;
+  const isCompactMap = workflowStage === "map" && hasMap;
 
   return (
     <section
       aria-live="polite"
       className={cn(
-        "mb-3 flex items-start gap-3 rounded-lg border px-3 py-3 shadow-sm md:mb-4 md:px-4",
+        "flex items-start gap-3 rounded-lg border px-3 shadow-sm",
+        isCompactMap ? "mb-2 py-2 md:mb-3" : "mb-3 py-3 md:mb-4 md:px-4",
         content.tone === "neutral" && "bg-card/75",
-        content.tone === "working" &&
-          "border-primary/35 bg-primary/10",
+        content.tone === "working" && "border-primary/35 bg-primary/10",
         content.tone === "ready" && "border-action/35 bg-action/10",
-        content.tone === "error" &&
-          "border-destructive/40 bg-destructive/10"
+        content.tone === "error" && "border-destructive/40 bg-destructive/10"
       )}
       role={content.tone === "error" ? "alert" : "status"}
     >
       <Icon
         aria-hidden="true"
         className={cn(
-          "mt-0.5 size-5 shrink-0",
+          "mt-0.5 shrink-0",
+          isCompactMap ? "size-4" : "size-5",
           content.tone === "working" && "animate-spin text-primary",
           content.tone === "ready" && "text-action",
           content.tone === "error" && "text-destructive",
@@ -67,17 +69,17 @@ export function WorkflowStatusBanner({
           <p className="text-sm font-semibold">{content.title}</p>
           {hasMap ? (
             <span className="rounded-md border bg-background/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-              {currentVersionLabel ?? "Versión actual"}
+              {currentVersionLabel ?? "Version actual"}
             </span>
           ) : null}
           {workflowStage === "map" && refinementQuestionCount > 0 ? (
             <span className="rounded-md border border-hypothesis/35 bg-hypothesis/10 px-2 py-0.5 text-[11px] font-medium text-hypothesis">
-              Round crítico activo
+              Refinamiento pendiente
             </span>
           ) : null}
           {workflowStage === "questions" ? (
             <span className="rounded-md border bg-background/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-              Round inicial
+              Primera ronda
             </span>
           ) : null}
         </div>
@@ -97,7 +99,7 @@ function getStatusContent(input: StatusInput) {
       description:
         "Tu contenido anterior sigue guardado. Revisa el aviso del panel derecho y vuelve a intentarlo.",
       icon: AlertCircle,
-      title: "No se ha completado la acción",
+      title: "No se ha completado la accion",
       tone: "error" as const,
     };
   }
@@ -106,14 +108,14 @@ function getStatusContent(input: StatusInput) {
     return input.workflowStage === "map"
       ? {
           description:
-            "Estamos buscando nuevos puntos débiles sin modificar el mapa actual.",
+            "Buscando nuevas preguntas sin modificar el mapa actual.",
           icon: LoaderCircle,
-          title: "Preparando otro round crítico",
+          title: "Preparando nueva ronda",
           tone: "working" as const,
         }
       : {
           description:
-            "Estamos evaluando la claridad, los supuestos y la información que falta.",
+            "Evaluando claridad, supuestos e informacion que falta.",
           icon: LoaderCircle,
           title: "Analizando la idea",
           tone: "working" as const,
@@ -126,12 +128,12 @@ function getStatusContent(input: StatusInput) {
           description:
             "El mapa actual se mantiene hasta que el refinamiento termine correctamente.",
           icon: LoaderCircle,
-          title: "Aplicando el refinamiento",
+          title: "Aplicando refinamiento",
           tone: "working" as const,
         }
       : {
           description:
-            "Estamos convirtiendo la idea y las respuestas en un mapa estratégico.",
+            "Convirtiendo la idea y las respuestas en un mapa estrategico.",
           icon: LoaderCircle,
           title: "Construyendo el mapa",
           tone: "working" as const,
@@ -142,10 +144,10 @@ function getStatusContent(input: StatusInput) {
     return {
       description:
         input.refinementQuestionCount > 0
-          ? "Responde el nuevo round bajo el canvas. El mapa seguirá visible hasta que decidas aplicar los cambios."
-          : "Explora los nodos, revisa el diagnóstico o inicia otro round crítico.",
+          ? "Responde la nueva ronda bajo el canvas. El mapa seguira visible hasta que apliques cambios."
+          : "Explora nodos, revisa el diagnostico o abre una nueva ronda para refinar.",
       icon: CheckCircle2,
-      title: "Mapa listo para trabajar",
+      title: "Mapa listo",
       tone: "ready" as const,
     };
   }
@@ -159,7 +161,7 @@ function getStatusContent(input: StatusInput) {
       icon: MessageCircleQuestion,
       title:
         input.questionCount > 0
-          ? "Preguntas críticas preparadas"
+          ? "Preguntas criticas preparadas"
           : "Listo para generar el mapa",
       tone: "ready" as const,
     };

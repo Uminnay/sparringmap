@@ -13,6 +13,7 @@ const navigationItems: Array<{ label: string; value: AppView }> = [
 interface SidebarProps {
   activeView: AppView;
   archivedCount: number;
+  hasActiveProject: boolean;
   isOpen: boolean;
   onNavigate: (view: AppView) => void;
   onToggle: () => void;
@@ -22,6 +23,7 @@ interface SidebarProps {
 export function Sidebar({
   activeView,
   archivedCount,
+  hasActiveProject,
   isOpen,
   onNavigate,
   onToggle,
@@ -31,7 +33,7 @@ export function Sidebar({
     return (
       <aside className="hidden border-r bg-panel/95 shadow-sm lg:flex lg:min-h-screen lg:flex-col lg:items-center lg:px-2 lg:py-4">
         <Button
-          aria-label="Mostrar navegación"
+          aria-label="Mostrar navegacion"
           onClick={onToggle}
           size="icon"
           type="button"
@@ -61,12 +63,12 @@ export function Sidebar({
           <div className="min-w-0">
             <p className="truncate text-base font-semibold">SparringMap</p>
             <p className="truncate text-xs text-muted-foreground">
-              Mapa estratégico visual
+              Mapa estrategico visual
             </p>
           </div>
         </div>
         <Button
-          aria-label="Ocultar navegación"
+          aria-label="Ocultar navegacion"
           className="hidden lg:inline-flex"
           onClick={onToggle}
           size="icon"
@@ -85,16 +87,20 @@ export function Sidebar({
               : item.value === "archive"
                 ? archivedCount
                 : 0;
+          const label =
+            item.value === "new" && hasActiveProject
+              ? "Mapa abierto"
+              : item.label;
 
           return (
             <button
-              key={item.value}
               className="rounded-md px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-secondary data-[active=true]:text-foreground"
               data-active={activeView === item.value}
+              key={item.value}
               onClick={() => onNavigate(item.value)}
               type="button"
             >
-              <span>{item.label}</span>
+              <span>{label}</span>
               {count > 0 ? (
                 <span className="float-right rounded-full bg-primary/15 px-2 text-xs text-primary">
                   {count}

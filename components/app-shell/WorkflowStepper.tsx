@@ -18,12 +18,14 @@ const stageRank: Record<WorkflowStage, number> = {
 interface WorkflowStepperProps {
   activeStage: WorkflowStage;
   availableStage: WorkflowStage;
+  compact?: boolean;
   onStageChange: (stage: WorkflowStage) => void;
 }
 
 export function WorkflowStepper({
   activeStage,
   availableStage,
+  compact = false,
   onStageChange,
 }: WorkflowStepperProps) {
   const availableRank = stageRank[availableStage];
@@ -31,7 +33,10 @@ export function WorkflowStepper({
   return (
     <nav
       aria-label="Etapas del mapa"
-      className="grid w-full grid-cols-3 gap-1 rounded-lg border bg-background/55 p-1"
+      className={cn(
+        "grid w-full grid-cols-3 gap-1 rounded-lg border bg-background/55 p-1",
+        compact && "max-w-xl"
+      )}
     >
       {stages.map((stage, index) => {
         const isActive = stage.value === activeStage;
@@ -43,7 +48,8 @@ export function WorkflowStepper({
           <button
             aria-current={isActive ? "step" : undefined}
             className={cn(
-              "flex min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors",
+              "flex min-w-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors",
+              compact ? "min-h-8" : "min-h-10",
               "disabled:cursor-not-allowed disabled:opacity-40",
               isActive
                 ? "bg-primary text-primary-foreground shadow-sm"
@@ -54,7 +60,12 @@ export function WorkflowStepper({
             onClick={() => onStageChange(stage.value)}
             type="button"
           >
-            <span className="grid size-5 shrink-0 place-items-center rounded-full border border-current text-[11px]">
+            <span
+              className={cn(
+                "grid shrink-0 place-items-center rounded-full border border-current text-[11px]",
+                compact ? "size-4" : "size-5"
+              )}
+            >
               {isCompleted && !isActive ? (
                 <Check aria-hidden="true" />
               ) : (

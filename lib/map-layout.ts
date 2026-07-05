@@ -8,7 +8,7 @@ export function buildDeterministicNodePositions(
   structuredResponse: AIStructuredResponse
 ): Record<string, MapPosition> {
   return {
-    central: { x: -160, y: -104 },
+    central: { x: -150, y: -96 },
     ...sectionPositions(
       "objective",
       structuredResponse.sections.objectives.length
@@ -39,20 +39,20 @@ function calculatePosition(
   index: number,
   count: number
 ) {
-  const horizontalOffset = (index - (count - 1) / 2) * 340;
-  const verticalOffset = (index - (count - 1) / 2) * 260;
+  const horizontalOffset = (index - (count - 1) / 2) * 300;
+  const verticalOffset = (index - (count - 1) / 2) * 220;
 
   if (kind === "objective") {
-    return { x: -144 + horizontalOffset, y: -680 };
+    return { x: -144 + horizontalOffset, y: -560 };
   }
 
   if (kind === "risk") {
-    return { x: -980, y: -88 + verticalOffset };
+    return { x: -760, y: -88 + verticalOffset };
   }
 
   if (kind === "action") {
-    return { x: 700, y: -88 + verticalOffset };
+    return { x: 520, y: -88 + verticalOffset };
   }
 
-  return { x: -144 + horizontalOffset, y: 680 };
+  return { x: -144 + horizontalOffset, y: 560 };
 }

@@ -1,10 +1,11 @@
+import type { IdeaFormValues } from "@/components/idea/IdeaForm";
 import { StageReviewPanel } from "@/components/sparring/StageReviewPanel";
 import { AI_MODEL_OPTIONS, PROJECT_TYPE_OPTIONS } from "@/lib/constants";
-import type { IdeaFormValues } from "@/components/idea/IdeaForm";
 import type { SparringProject, WorkflowStage } from "@/types";
 
 interface StageContextPanelsProps {
   answers: string[];
+  compact?: boolean;
   draft: IdeaFormValues;
   includeQuestions: boolean;
   onEditStage: (stage: Extract<WorkflowStage, "idea" | "questions">) => void;
@@ -13,6 +14,7 @@ interface StageContextPanelsProps {
 
 export function StageContextPanels({
   answers,
+  compact = false,
   draft,
   includeQuestions,
   onEditStage,
@@ -27,11 +29,12 @@ export function StageContextPanels({
   const questions = project?.sparringQuestions ?? [];
 
   return (
-    <div className="grid gap-2">
+    <div className={compact ? "grid gap-2 xl:grid-cols-2" : "grid gap-2"}>
       <StageReviewPanel
         actionLabel="Editar idea"
+        compact={compact}
         onEdit={() => onEditStage("idea")}
-        summary={`${projectType?.label ?? "Proyecto"} · ${model?.label ?? "Modelo IA"}`}
+        summary={`${projectType?.label ?? "Proyecto"} - ${model?.label ?? "Modelo IA"}`}
         title="Idea completada"
       >
         <div className="grid gap-3 text-sm md:grid-cols-[minmax(0,1fr)_220px]">
@@ -54,8 +57,9 @@ export function StageContextPanels({
       {includeQuestions && project?.readinessScore !== undefined ? (
         <StageReviewPanel
           actionLabel="Editar respuestas"
+          compact={compact}
           onEdit={() => onEditStage("questions")}
-          summary={`${project.readinessScore}/100 · ${questions.length} preguntas críticas`}
+          summary={`${project.readinessScore}/100 - ${questions.length} preguntas criticas`}
           title="Preguntas completadas"
         >
           {questions.length > 0 ? (
@@ -73,7 +77,7 @@ export function StageContextPanels({
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              La idea no necesitó preguntas adicionales antes de generar el
+              La idea no necesito preguntas adicionales antes de generar el
               mapa.
             </p>
           )}

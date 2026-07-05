@@ -152,7 +152,7 @@ export function CanvasPlaceholder({
 }: CanvasPlaceholderProps) {
   const [showMiniMap, setShowMiniMap] = useState(true);
   const [showDependencies, setShowDependencies] = useState(false);
-  const [compactNodes, setCompactNodes] = useState(false);
+  const [compactNodes, setCompactNodes] = useState(true);
   const [priorityFilter, setPriorityFilter] =
     useState<PriorityFilter>("all");
   const [visibleKinds, setVisibleKinds] =
@@ -230,7 +230,7 @@ export function CanvasPlaceholder({
     }
 
     window.requestAnimationFrame(() => {
-      void flowInstance.fitView({ maxZoom: 1.08, padding: 0.18 });
+      void flowInstance.fitView({ maxZoom: 0.95, padding: 0.22 });
     });
   }, [
     filteredNodes,
@@ -281,8 +281,8 @@ export function CanvasPlaceholder({
     window.requestAnimationFrame(() => {
       void flowInstance?.fitView({
         duration: 300,
-        maxZoom: 1.08,
-        padding: 0.18,
+        maxZoom: 0.95,
+        padding: 0.22,
       });
     });
   }
@@ -290,8 +290,8 @@ export function CanvasPlaceholder({
   function handleRecenter() {
     void flowInstance?.fitView({
       duration: 300,
-      maxZoom: 1.08,
-      padding: 0.18,
+      maxZoom: 0.95,
+      padding: 0.22,
     });
   }
 
@@ -340,7 +340,7 @@ export function CanvasPlaceholder({
   }
 
   return (
-    <section className="relative min-h-[640px] overflow-hidden rounded-xl border bg-canvas shadow-sm md:min-h-[760px]">
+    <section className="relative min-h-[680px] overflow-hidden rounded-xl border bg-canvas shadow-sm md:min-h-[820px]">
       <ReactFlow
         className="strategic-flow"
         colorMode="dark"
@@ -353,7 +353,7 @@ export function CanvasPlaceholder({
         defaultViewport={mapLayout?.viewport}
         edges={edges}
         fitView={!mapLayout?.viewport}
-        fitViewOptions={{ maxZoom: 1.08, padding: 0.18 }}
+        fitViewOptions={{ maxZoom: 0.95, padding: 0.22 }}
         maxZoom={1.4}
         minZoom={0.35}
         nodeTypes={nodeTypes}
@@ -425,16 +425,18 @@ export function CanvasPlaceholder({
 
       <div className="absolute inset-x-3 top-3 z-10 flex flex-col gap-2 md:inset-x-4 md:top-4">
         <div className="flex flex-col gap-2 xl:flex-row xl:items-start xl:justify-between">
-          <section className="max-w-full rounded-lg border bg-background/86 p-2 shadow-sm backdrop-blur md:max-w-4xl">
+          <section className="max-w-full rounded-lg border bg-background/80 p-1.5 shadow-sm backdrop-blur md:max-w-2xl">
             <div className="flex flex-wrap items-center gap-1">
               {typedNodeKinds.map((kind) => (
                 <Button
+                  aria-label={`${visibleKinds[kind] ? "Ocultar" : "Mostrar"} ${visibleKindLabels[kind]}`}
                   className={cn(
-                    "h-8 px-2 text-xs",
+                    "size-8 px-0 text-xs",
                     visibleKinds[kind] && kindButtonClass[kind]
                   )}
                   key={kind}
                   onClick={() => handleKindToggle(kind)}
+                  title={visibleKindLabels[kind]}
                   type="button"
                   variant={visibleKinds[kind] ? "secondary" : "ghost"}
                 >
@@ -443,37 +445,55 @@ export function CanvasPlaceholder({
                   ) : (
                     <EyeOff aria-hidden="true" />
                   )}
-                  {visibleKindLabels[kind]}
+                  <span className="sr-only">{visibleKindLabels[kind]}</span>
                 </Button>
               ))}
               <Button
-                className="h-8 px-2 text-xs"
+                aria-label={
+                  priorityFilter === "high"
+                    ? "Mostrar todos los nodos"
+                    : "Mostrar solo alta prioridad"
+                }
+                className="size-8 px-0 text-xs"
                 disabled={!structuredResponse}
                 onClick={() =>
                   setPriorityFilter((value) =>
                     value === "all" ? "high" : "all"
                   )
                 }
+                title={
+                  priorityFilter === "high"
+                    ? "Mostrar todos los nodos"
+                    : "Alta prioridad"
+                }
                 type="button"
                 variant={priorityFilter === "high" ? "secondary" : "ghost"}
               >
                 <Focus aria-hidden="true" />
-                Alta prioridad
+                <span className="sr-only">Alta prioridad</span>
               </Button>
               <Button
-                className="h-8 px-2 text-xs"
+                aria-label={
+                  showDependencies
+                    ? "Ocultar dependencias"
+                    : "Mostrar dependencias"
+                }
+                className="size-8 px-0 text-xs"
                 disabled={!structuredResponse}
                 onClick={() => setShowDependencies((value) => !value)}
+                title="Dependencias"
                 type="button"
                 variant={showDependencies ? "secondary" : "ghost"}
               >
                 <GitBranch aria-hidden="true" />
-                Dependencias
+                <span className="sr-only">Dependencias</span>
               </Button>
               <Button
-                className="h-8 px-2 text-xs"
+                aria-label={compactNodes ? "Expandir nodos" : "Compactar nodos"}
+                className="size-8 px-0 text-xs"
                 disabled={!structuredResponse}
                 onClick={() => setCompactNodes((value) => !value)}
+                title={compactNodes ? "Expandir nodos" : "Compactar nodos"}
                 type="button"
                 variant={compactNodes ? "secondary" : "ghost"}
               >
@@ -482,7 +502,9 @@ export function CanvasPlaceholder({
                 ) : (
                   <Minimize2 aria-hidden="true" />
                 )}
-                {compactNodes ? "Expandir" : "Compactar"}
+                <span className="sr-only">
+                  {compactNodes ? "Expandir" : "Compactar"}
+                </span>
               </Button>
             </div>
           </section>

@@ -3,20 +3,27 @@
 import { useState, type ReactNode } from "react";
 import {
   Check,
+  ChevronDown,
   ClipboardCopy,
   Download,
   FileJson,
+  FileText,
   Printer,
   Save,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  createExecutiveSummaryText,
+  createProjectDocumentHTML,
+} from "@/lib/document-export";
 import { formatProjectMarkdown } from "@/lib/markdown";
 import { createProjectTransferJSON } from "@/lib/project-transfer";
 import type { SparringProject } from "@/types";
 
 interface MapWorkspaceBarProps {
   children?: ReactNode;
+  compact?: boolean;
   latestProject?: SparringProject;
   onProjectNameChange: (value: string) => void;
   onSaveProject: () => void;
@@ -26,23 +33,25 @@ interface MapWorkspaceBarProps {
 
 export function MapWorkspaceBar({
   children,
+  compact = false,
   latestProject,
   onProjectNameChange,
   onSaveProject,
   projectName,
   savedNotice,
 }: MapWorkspaceBarProps) {
-  const [copiedMarkdown, setCopiedMarkdown] = useState(false);
+  const [copiedSummary, setCopiedSummary] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const canExport = Boolean(latestProject?.structuredResponse);
 
-  async function handleCopyMarkdown() {
+  async function handleCopySummary() {
     if (!latestProject?.structuredResponse) {
       return;
     }
 
-    await navigator.clipboard.writeText(formatProjectMarkdown(latestProject));
-    setCopiedMarkdown(true);
-    window.setTimeout(() => setCopiedMarkdown(false), 1800);
+    await navigator.clipboard.writeText(createExecutiveSummaryText(latestProject));
+    setCopiedSummary(true);
+    window.setTimeout(() => setCopiedSummary(false), 1800);
   }
 
   function handleDownloadMarkdown() {
@@ -69,13 +78,35 @@ export function MapWorkspaceBar({
     );
   }
 
+  function handleDownloadDocument() {
+    if (!latestProject?.structuredResponse) {
+      return;
+    }
+
+    downloadTextFile(
+      `${safeFilename(latestProject.title)}.doc`,
+      createProjectDocumentHTML(latestProject),
+      "application/msword;charset=utf-8"
+    );
+  }
+
   return (
-    <section className="rounded-xl border bg-card/90 p-3 shadow-sm backdrop-blur md:p-4">
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        <label className="grid min-w-0 flex-1 gap-1 text-xs font-medium uppercase text-muted-foreground md:grid-cols-[112px_minmax(0,1fr)] md:items-center">
+    <section
+      className={
+        compact
+          ? "rounded-lg border bg-card/85 p-2 shadow-sm backdrop-blur"
+          : "rounded-xl border bg-card/90 p-3 shadow-sm backdrop-blur md:p-4"
+      }
+    >
+      <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
+        <label className="grid min-w-0 flex-1 gap-1 text-xs font-medium uppercase text-muted-foreground md:grid-cols-[88px_minmax(0,1fr)] md:items-center">
           Proyecto
           <input
-            className="h-10 min-w-0 rounded-md border bg-background px-3 text-sm font-normal normal-case text-foreground outline-none ring-offset-background focus:ring-2 focus:ring-ring"
+            className={
+              compact
+                ? "h-8 min-w-0 rounded-md border bg-background px-2 text-sm font-normal normal-case text-foreground outline-none ring-offset-background focus:ring-2 focus:ring-ring"
+                : "h-10 min-w-0 rounded-md border bg-background px-3 text-sm font-normal normal-case text-foreground outline-none ring-offset-background focus:ring-2 focus:ring-ring"
+            }
             disabled={!latestProject}
             onChange={(event) => onProjectNameChange(event.currentTarget.value)}
             placeholder="Nombre para guardar"
@@ -83,10 +114,11 @@ export function MapWorkspaceBar({
           />
         </label>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           <Button
             disabled={!latestProject}
             onClick={onSaveProject}
+            size={compact ? "sm" : "default"}
             type="button"
             variant="outline"
           >
@@ -95,50 +127,114 @@ export function MapWorkspaceBar({
           </Button>
           <Button
             disabled={!canExport}
-            onClick={() => void handleCopyMarkdown()}
+            onClick={() => void handleCopySummary()}
+            size={compact ? "sm" : "default"}
+            title="Copiar veredicto, riesgos y acciones principales"
             type="button"
             variant="outline"
           >
-            {copiedMarkdown ? (
+            {copiedSummary ? (
               <Check aria-hidden="true" data-icon="inline-start" />
             ) : (
               <ClipboardCopy aria-hidden="true" data-icon="inline-start" />
             )}
-            {copiedMarkdown ? "Copiado" : "Copiar"}
+            {copiedSummary ? "Copiado" : "Resumen"}
           </Button>
           <Button
+            aria-expanded={isExportOpen}
             disabled={!canExport}
-            onClick={handleDownloadMarkdown}
+            onClick={() => setIsExportOpen((value) => !value)}
+            size={compact ? "sm" : "default"}
             type="button"
             variant="outline"
           >
             <Download aria-hidden="true" data-icon="inline-start" />
-            MD
-          </Button>
-          <Button
-            disabled={!canExport}
-            onClick={handleDownloadJSON}
-            type="button"
-            variant="outline"
-          >
-            <FileJson aria-hidden="true" data-icon="inline-start" />
-            JSON
-          </Button>
-          <Button
-            disabled={!canExport}
-            onClick={() => window.print()}
-            title="Abrir diálogo de impresión con informe limpio"
-            type="button"
-            variant="outline"
-          >
-            <Printer aria-hidden="true" data-icon="inline-start" />
-            Informe PDF
+            Exportar
+            <ChevronDown
+              aria-hidden="true"
+              className={
+                isExportOpen
+                  ? "rotate-180 transition-transform"
+                  : "transition-transform"
+              }
+            />
           </Button>
         </div>
       </div>
 
-      {children ? <div className="mt-3">{children}</div> : null}
+      {isExportOpen ? (
+        <div className="mt-2 grid gap-2 rounded-lg border bg-background/60 p-2 text-sm md:grid-cols-2 xl:grid-cols-4">
+          <ExportOption
+            description="Editable en Word o Google Docs."
+            disabled={!canExport}
+            icon={<FileText aria-hidden="true" />}
+            label="Documento"
+            onClick={handleDownloadDocument}
+          />
+          <ExportOption
+            description="Markdown para Notion o documentacion."
+            disabled={!canExport}
+            icon={<Download aria-hidden="true" />}
+            label="Notas"
+            onClick={handleDownloadMarkdown}
+          />
+          <ExportOption
+            description="Vista limpia para imprimir o guardar PDF."
+            disabled={!canExport}
+            icon={<Printer aria-hidden="true" />}
+            label="Informe"
+            onClick={() => window.print()}
+          />
+          <ExportOption
+            description="Copia completa para reimportar el mapa."
+            disabled={!canExport}
+            icon={<FileJson aria-hidden="true" />}
+            label="Backup"
+            onClick={handleDownloadJSON}
+          />
+          <p className="text-xs leading-5 text-muted-foreground md:col-span-2 xl:col-span-4">
+            El backup conserva versiones, posiciones y estados del mapa. Usalo
+            para mover o recuperar el proyecto; no es el formato pensado para
+            leer.
+          </p>
+        </div>
+      ) : null}
+
+      {children ? (
+        <div className={compact ? "mt-2" : "mt-3"}>{children}</div>
+      ) : null}
     </section>
+  );
+}
+
+function ExportOption({
+  description,
+  disabled,
+  icon,
+  label,
+  onClick,
+}: {
+  description: string;
+  disabled: boolean;
+  icon: ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className="flex min-h-20 items-start gap-2 rounded-md border bg-card/80 px-3 py-2 text-left transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+      disabled={disabled}
+      onClick={onClick}
+      type="button"
+    >
+      <span className="mt-0.5 text-primary">{icon}</span>
+      <span>
+        <span className="block font-medium">{label}</span>
+        <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+          {description}
+        </span>
+      </span>
+    </button>
   );
 }
 
